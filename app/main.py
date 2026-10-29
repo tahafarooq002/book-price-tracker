@@ -50,7 +50,7 @@ def get_book(book_id: int, db: Session = Depends(get_db)):
 @app.post("/scrape")
 def trigger_scrape(db: Session = Depends(get_db)):
     try:
-        books_data = scrape_books(max_pages=3)
+        books_data = scrape_books(max_pages_per_category=1)
         inserted = crud.upsert_books(db, books_data)
         return {
             "message": "Scraping completed",

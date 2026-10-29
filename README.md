@@ -1,15 +1,15 @@
 # Book Price Tracker API
 
-A simple backend service that scrapes book data from [books.toscrape.com](https://books.toscrape.com) and exposes it through a REST API.
+A backend service that scrapes book data from [books.toscrape.com](https://books.toscrape.com) and exposes it through a clean REST API.
 
 ## Features
 
-- Scrapes book title, price, rating, availability, and category
+- Scrapes book **title, price, rating, availability, and real category**
 - Stores data in PostgreSQL
-- RESTful API with FastAPI
-- Pagination and filtering
-- Dockerized (run with one command)
+- RESTful API built with FastAPI
+- Supports pagination and filtering (by category & price range)
 - Prevents duplicate entries
+- Fully Dockerized (run with a single command)
 
 ## Tech Stack
 
@@ -23,7 +23,7 @@ A simple backend service that scrapes book data from [books.toscrape.com](https:
 ## How to Run
 
 ### Prerequisites
-- Docker & Docker Compose installed
+- Docker and Docker Compose installed
 
 ### Start the project
 
@@ -31,45 +31,53 @@ A simple backend service that scrapes book data from [books.toscrape.com](https:
 docker-compose up --build
 ```
 
-The API will be available at: [http://localhost:8000](http://localhost:8000)
+The API will be available at:  
+**http://localhost:8000**
 
-Interactive docs: [http://localhost:8000/docs](http://localhost:8000/docs)
+Interactive API documentation (Swagger UI):  
+**http://localhost:8000/docs**
 
 ---
 
 ## API Endpoints
 
 ### 1. Get all books (with pagination & filters)
+
 ```
 GET /books
 ```
 
 **Query Parameters:**
 - `skip` (default: 0)
-- `limit` (default: 20)
+- `limit` (default: 20, max: 100)
 - `category` (optional)
 - `min_price` (optional)
 - `max_price` (optional)
 
 **Examples:**
+
 ```
 GET /books
 GET /books?skip=0&limit=10
 GET /books?min_price=20&max_price=40
-GET /books?category=General
+GET /books?category=Travel
+GET /books?category=Mystery
+GET /books?category=Fantasy&min_price=30
 ```
 
-### 2. Get a single book
+### 2. Get a single book by ID
+
 ```
 GET /books/{id}
 ```
 
-### 3. Trigger scraper
+### 3. Trigger the scraper
+
 ```
 POST /scrape
 ```
 
-This will scrape the latest books and insert only new ones (no duplicates).
+This will scrape the latest books from the website and insert only new ones (duplicates are automatically skipped).
 
 ---
 
@@ -88,7 +96,7 @@ python -m app.scraper
 ```
 book-price-tracker/
 ├── app/
-│   ├── main.py          # FastAPI application
+│   ├── main.py          # FastAPI application & endpoints
 │   ├── database.py      # Database connection
 │   ├── models.py        # SQLAlchemy models
 │   ├── schemas.py       # Pydantic schemas
@@ -97,14 +105,23 @@ book-price-tracker/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
+├── .gitignore
 └── README.md
 ```
 
 ## Environment Variables
 
-| Variable       | Description                  |
-|----------------|------------------------------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `POSTGRES_USER`| Database user                |
-| `POSTGRES_PASSWORD` | Database password       |
-| `POSTGRES_DB`  | Database name                |
+| Variable            | Description                     |
+|---------------------|---------------------------------|
+| `DATABASE_URL`      | PostgreSQL connection string    |
+| `POSTGRES_USER`     | Database username               |
+| `POSTGRES_PASSWORD` | Database password               |
+| `POSTGRES_DB`       | Database name                   |
+
+---
+
+## Notes
+
+- The scraper extracts real categories (Travel, Mystery, Fantasy, etc.)
+- Duplicate books are prevented using a unique constraint on `title + category`
+- The project is designed to run fully with `docker-compose up --build`

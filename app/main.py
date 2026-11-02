@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import Optional, List
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import get_db, engine, Base
 from app.models import Book
@@ -17,6 +18,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Later you can restrict to your Vercel domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 @app.get("/")
 def root():
     return {"message": "Book Price Tracker API is running"}
@@ -24,7 +33,7 @@ def root():
 @app.get("/books", response_model=List[BookOut])
 def list_books(
     skip: int = Query(0, ge=0),
-    limit: int = Query(20, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     category: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
